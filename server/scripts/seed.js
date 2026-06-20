@@ -165,7 +165,15 @@ const seed = async () => {
   await User.deleteMany();
   await Product.deleteMany();
 
-  const createdUsers = await User.create(users);
+  // Create users one by one so pre-save hooks and role field work correctly
+  const createdUsers = [];
+  for (const u of users) {
+    const created = await User.create(u);
+    if (u.role === 'admin') {
+      await User.findByIdAndUpdate(created._id, { role: 'admin' });
+    }
+    createdUsers.push(created);
+  }
   await Product.create(products);
 
   console.log(`✓ Seeded ${createdUsers.length} users`);
