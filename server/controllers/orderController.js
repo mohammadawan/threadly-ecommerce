@@ -182,20 +182,27 @@ const getAnalytics = async (req, res, next) => {
     const days = Number(req.query.days) || 30;
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const [revenueData, totals, productCount, customerCount, bestSellers] = await Promise.all([
+    // Count all orders except cancelled
+    const activeFilter = { status: { $ne: 'cancelled' } };
+    const recentFilter = { status: { $ne: 'cancelled' }, createdAt: { $gte: since } };
+
+    const [revenueData, totals, productCount, customerCount, bestSellers, recentOrders, pendingCOD] = await Promise.all([
+      // Revenue chart: group by day for recent non-cancelled orders
       Order.aggregate([
-        { $match: { isPaid: true, paidAt: { $gte: since } } },
+        { $match: recentFilter },
         {
           $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$paidAt' } },
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
             revenue: { $sum: '$totalPrice' },
             orders: { $sum: 1 },
           },
         },
         { $sort: { _id: 1 } },
       ]),
+
+      // Total revenue & orders (all time, non-cancelled)
       Order.aggregate([
-        { $match: { isPaid: true } },
+        { $match: activeFilter },
         {
           $group: {
             _id: null,
@@ -204,12 +211,28 @@ const getAnalytics = async (req, res, next) => {
           },
         },
       ]),
+
       Product.countDocuments({ isActive: true }),
       User.countDocuments({ role: 'customer' }),
+
+      // Best sellers by soldCount
       Product.find({ isActive: true })
         .sort({ soldCount: -1 })
         .limit(5)
         .select('name soldCount images price discountPrice'),
+
+      // 5 most recent orders
+      Order.find({})
+        .populate('user', 'name')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('_id totalPrice status paymentMethod createdAt user'),
+
+      // Pending COD amount (COD orders not yet delivered)
+      Order.aggregate([
+        { $match: { paymentMethod: 'cod', isPaid: false, status: { $ne: 'cancelled' } } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } },
+      ]),
     ]);
 
     res.json({
@@ -219,6 +242,11 @@ const getAnalytics = async (req, res, next) => {
       totalProducts: productCount,
       totalCustomers: customerCount,
       bestSellers,
+      recentOrders,
+      pendingCOD: {
+        amount: pendingCOD[0]?.total || 0,
+        count: pendingCOD[0]?.count || 0,
+      },
     });
   } catch (err) {
     next(err);
