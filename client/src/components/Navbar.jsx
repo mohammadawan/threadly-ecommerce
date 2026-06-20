@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -9,9 +9,22 @@ const Navbar = () => {
   const { userInfo } = useSelector((s) => s.auth);
   const { cartItems } = useSelector((s) => s.cart);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const dropdownRef = useRef(null);
 
   const cartCount = cartItems.reduce((a, i) => a + i.qty, 0);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -20,6 +33,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    setDropdownOpen(false);
     navigate('/login');
   };
 
@@ -64,19 +78,41 @@ const Navbar = () => {
             </Link>
 
             {userInfo ? (
-              <div className="relative group">
-                <button className="flex items-center gap-1 text-sm font-medium">
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-1 text-sm font-medium hover:text-gray-600"
+                >
                   {userInfo.name.split(' ')[0]} ▾
                 </button>
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg hidden group-hover:block">
-                  {userInfo.role === 'admin' && (
-                    <Link to="/admin" className="block px-4 py-2 text-sm hover:bg-gray-50">Admin Dashboard</Link>
-                  )}
-                  <Link to="/orders" className="block px-4 py-2 text-sm hover:bg-gray-50">My Orders</Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
-                    Logout
-                  </button>
-                </div>
+
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    {userInfo.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="block px-4 py-2.5 text-sm hover:bg-gray-50"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    <Link
+                      to="/orders"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-4 py-2.5 text-sm hover:bg-gray-50"
+                    >
+                      My Orders
+                    </Link>
+                    <hr className="border-gray-100" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link to="/login" className="text-sm font-medium bg-black text-white px-4 py-1.5 rounded-lg hover:bg-gray-800">
