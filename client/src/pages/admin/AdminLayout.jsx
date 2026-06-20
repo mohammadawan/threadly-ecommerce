@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../redux/authSlice';
 
 const links = [
   { to: '/admin', label: '📊 Dashboard', end: true },
@@ -7,32 +9,71 @@ const links = [
   { to: '/admin/users', label: '👥 Users' },
 ];
 
-const AdminLayout = () => (
-  <div className="flex min-h-screen bg-gray-50">
-    <aside className="w-56 bg-gray-900 text-gray-300 flex flex-col shrink-0">
-      <div className="p-5 border-b border-gray-800">
-        <p className="text-white font-bold text-lg">Threadly</p>
-        <p className="text-xs text-gray-500">Admin Panel</p>
-      </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {links.map((l) => (
-          <NavLink
-            key={l.to}
-            to={l.to}
-            end={l.end}
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${isActive ? 'bg-white text-gray-900 font-semibold' : 'hover:bg-gray-800 hover:text-white'}`
-            }
+const AdminLayout = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { userInfo } = useSelector((s) => s.auth);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <aside className="w-56 bg-gray-900 text-gray-300 flex flex-col shrink-0">
+        {/* Logo */}
+        <div className="p-5 border-b border-gray-800">
+          <p className="text-white font-bold text-lg">Threadly</p>
+          <p className="text-xs text-gray-500">Admin Panel</p>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 p-3 space-y-1">
+          {links.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.end}
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${isActive ? 'bg-white text-gray-900 font-semibold' : 'hover:bg-gray-800 hover:text-white'}`
+              }
+            >
+              {l.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Bottom actions */}
+        <div className="p-3 border-t border-gray-800 space-y-1">
+          {/* Back to site */}
+          <button
+            onClick={() => navigate('/')}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm hover:bg-gray-800 hover:text-white transition"
           >
-            {l.label}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
-    <main className="flex-1 overflow-auto">
-      <Outlet />
-    </main>
-  </div>
-);
+            🌐 Back to Site
+          </button>
+
+          {/* User info */}
+          <div className="px-3 py-2 text-xs text-gray-500">
+            Logged in as <span className="text-gray-300 font-medium">{userInfo?.name}</span>
+          </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-900 hover:text-red-300 transition"
+          >
+            🚪 Logout
+          </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-auto">
+        <Outlet />
+      </main>
+    </div>
+  );
+};
 
 export default AdminLayout;
