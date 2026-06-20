@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { removeFromCart, updateQty } from '../../redux/cartSlice';
+import { formatPrice } from '../../utils/formatPrice';
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -9,7 +10,7 @@ const CartPage = () => {
   const { userInfo } = useSelector((s) => s.auth);
 
   const itemsPrice = cartItems.reduce((a, i) => a + i.qty * (i.discountPrice && i.discountPrice < i.price ? i.discountPrice : i.price), 0);
-  const shippingPrice = itemsPrice > 100 ? 0 : 9.99;
+  const shippingPrice = itemsPrice > 10000 ? 0 : 499;
   const total = itemsPrice + shippingPrice;
 
   const handleCheckout = () => {
@@ -45,7 +46,7 @@ const CartPage = () => {
                 <div className="flex-1">
                   <Link to={`/products/${item._id}`} className="font-semibold hover:underline">{item.name}</Link>
                   <p className="text-sm text-gray-500">Size: {item.size} {item.color && `| Color: ${item.color}`}</p>
-                  <p className="font-bold mt-1">${itemPrice.toFixed(2)}</p>
+                  <p className="font-bold mt-1">{formatPrice(itemPrice)}</p>
                 </div>
                 <div className="flex flex-col items-end justify-between">
                   <button onClick={() => dispatch(removeFromCart({ id: item._id, size: item.size, color: item.color }))} className="text-red-400 hover:text-red-600 text-sm">Remove</button>
@@ -64,12 +65,12 @@ const CartPage = () => {
         <div className="bg-white border border-gray-200 rounded-xl p-6 h-fit space-y-4">
           <h2 className="text-lg font-bold">Order Summary</h2>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>${itemsPrice.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span>{shippingPrice === 0 ? 'FREE' : `$${shippingPrice.toFixed(2)}`}</span></div>
-            {shippingPrice > 0 && <p className="text-xs text-gray-400">Add ${(100 - itemsPrice).toFixed(2)} more for free shipping</p>}
+            <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>{formatPrice(itemsPrice)}</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span>{shippingPrice === 0 ? 'FREE' : formatPrice(shippingPrice)}</span></div>
+            {shippingPrice > 0 && <p className="text-xs text-gray-400">Add {formatPrice(10000 - itemsPrice)} more for free shipping</p>}
           </div>
           <div className="border-t border-gray-200 pt-4 flex justify-between font-bold text-lg">
-            <span>Total</span><span>${total.toFixed(2)}</span>
+            <span>Total</span><span>{formatPrice(total)}</span>
           </div>
           <button onClick={handleCheckout} className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition">
             Proceed to Checkout

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/cartSlice';
-import { addToWishlist, removeFromWishlist } from '../api/wishlistApi';
+import { addToWishlist } from '../api/wishlistApi';
 import Rating from './Rating';
+import { formatPrice } from '../utils/formatPrice';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
@@ -63,9 +64,9 @@ const ProductCard = ({ product }) => {
         <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{product.name}</h3>
         <Rating value={product.ratings} numReviews={product.numReviews} />
         <div className="flex items-center gap-2">
-          <span className="font-semibold">${price.toFixed(2)}</span>
+          <span className="font-semibold">{formatPrice(price)}</span>
           {product.discountPrice && product.discountPrice < product.price && (
-            <span className="text-gray-400 line-through text-sm">${product.price.toFixed(2)}</span>
+            <span className="text-gray-400 line-through text-sm">{formatPrice(product.price)}</span>
           )}
         </div>
       </div>

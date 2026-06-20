@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getAnalytics } from '../../api/orderApi';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Loader from '../../components/Loader';
+import { formatPrice } from '../../utils/formatPrice';
 
 const MetricCard = ({ label, value, sub }) => (
   <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -39,7 +40,7 @@ const DashboardPage = () => {
 
       {/* Metric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Total Revenue" value={`$${data?.totalRevenue?.toFixed(2) || '0.00'}`} sub="All time" />
+        <MetricCard label="Total Revenue" value={formatPrice(data?.totalRevenue || 0)} sub="All time" />
         <MetricCard label="Total Orders" value={data?.totalOrders || 0} sub="All time" />
         <MetricCard label="Products" value={data?.totalProducts || 0} sub="Active" />
         <MetricCard label="Customers" value={data?.totalCustomers || 0} sub="Registered" />
@@ -62,7 +63,7 @@ const DashboardPage = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="_id" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v) => [`$${v.toFixed(2)}`, 'Revenue']} />
+              <Tooltip formatter={(v) => [formatPrice(v), 'Revenue']} />
               <Area type="monotone" dataKey="revenue" stroke="#111827" strokeWidth={2} fill="url(#rev)" />
             </AreaChart>
           </ResponsiveContainer>
@@ -83,7 +84,7 @@ const DashboardPage = () => {
                 <p className="text-sm font-medium">{p.name}</p>
                 <p className="text-xs text-gray-400">{p.soldCount} sold</p>
               </div>
-              <p className="font-semibold">${p.price.toFixed(2)}</p>
+              <p className="font-semibold">{formatPrice(p.price)}</p>
             </div>
           ))}
         </div>

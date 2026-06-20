@@ -23,7 +23,7 @@ const products = [
   {
     name: 'Classic White Tee',
     description: 'A timeless white cotton t-shirt with a relaxed fit. Perfect for any casual occasion.',
-    price: 29.99,
+    price: 2999,
     category: 'men',
     subCategory: 'shirts',
     sizes: [
@@ -40,8 +40,8 @@ const products = [
   {
     name: 'Slim Fit Jeans',
     description: 'Modern slim fit jeans crafted from premium stretch denim for all-day comfort.',
-    price: 79.99,
-    discountPrice: 59.99,
+    price: 7999,
+    discountPrice: 5999,
     category: 'men',
     subCategory: 'jeans',
     sizes: [
@@ -58,7 +58,7 @@ const products = [
   {
     name: 'Floral Wrap Dress',
     description: 'Elegant wrap dress with a beautiful floral print. Flattering for all body types.',
-    price: 64.99,
+    price: 6499,
     category: 'women',
     subCategory: 'dresses',
     sizes: [
@@ -75,7 +75,7 @@ const products = [
   {
     name: 'Kids Graphic Hoodie',
     description: 'Cozy fleece hoodie with fun graphic print. Machine washable.',
-    price: 39.99,
+    price: 3999,
     category: 'kids',
     subCategory: 'hoodies',
     sizes: [
@@ -93,7 +93,7 @@ const products = [
   {
     name: 'Leather Belt',
     description: 'Full-grain leather belt with a brushed silver buckle. Fits waist 28–42 inches.',
-    price: 34.99,
+    price: 3499,
     category: 'accessories',
     subCategory: 'belts',
     sizes: [
@@ -108,8 +108,8 @@ const products = [
   {
     name: 'Oversized Knit Sweater',
     description: 'Chunky knit oversized sweater in a relaxed silhouette. Perfect for layering.',
-    price: 89.99,
-    discountPrice: 69.99,
+    price: 8999,
+    discountPrice: 6999,
     category: 'women',
     subCategory: 'sweaters',
     sizes: [
@@ -125,7 +125,7 @@ const products = [
   {
     name: 'Bomber Jacket',
     description: 'Classic bomber jacket with ribbed cuffs and hem. Lightweight and versatile.',
-    price: 119.99,
+    price: 11999,
     category: 'men',
     subCategory: 'jackets',
     sizes: [
@@ -142,7 +142,7 @@ const products = [
   {
     name: 'High-Waist Leggings',
     description: 'Buttery-soft high-waist leggings with four-way stretch. Squat-proof.',
-    price: 44.99,
+    price: 4499,
     category: 'women',
     subCategory: 'activewear',
     sizes: [

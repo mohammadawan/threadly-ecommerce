@@ -39,13 +39,13 @@ const createOrder = async (req, res, next) => {
     const itemsPrice = Number(
       itemsWithPrices.reduce((acc, i) => acc + i.price * i.qty, 0).toFixed(2)
     );
-    const shippingPrice = itemsPrice > 100 ? 0 : 9.99;
+    const shippingPrice = itemsPrice > 10000 ? 0 : 499;
     const totalPrice = Number((itemsPrice + shippingPrice).toFixed(2));
 
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalPrice * 100),
-      currency: 'usd',
+      currency: 'pkr',
       metadata: { userId: req.user._id.toString() },
     });
 

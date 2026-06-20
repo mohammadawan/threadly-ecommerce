@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts, deleteProduct } from '../../api/productApi';
 import Loader from '../../components/Loader';
+import { formatPrice } from '../../utils/formatPrice';
 import toast from 'react-hot-toast';
 
 const ProductsPage = () => {
@@ -70,8 +71,8 @@ const ProductsPage = () => {
                     <td className="p-4 capitalize text-gray-600">{p.category} / {p.subCategory}</td>
                     <td className="p-4">
                       {p.discountPrice ? (
-                        <div><span className="font-semibold">${p.discountPrice}</span><span className="text-gray-400 line-through ml-1 text-xs">${p.price}</span></div>
-                      ) : <span className="font-semibold">${p.price}</span>}
+                        <div><span className="font-semibold">{formatPrice(p.discountPrice)}</span><span className="text-gray-400 line-through ml-1 text-xs">{formatPrice(p.price)}</span></div>
+                      ) : <span className="font-semibold">{formatPrice(p.price)}</span>}
                     </td>
                     <td className="p-4">
                       <span className={`font-semibold ${totalStock <= 5 ? 'text-red-500' : 'text-green-600'}`}>{totalStock}</span>

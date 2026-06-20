@@ -6,6 +6,7 @@ import { addToCart } from '../../redux/cartSlice';
 import Rating from '../../components/Rating';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
+import { formatPrice } from '../../utils/formatPrice';
 import toast from 'react-hot-toast';
 
 const ProductDetailPage = () => {
@@ -94,9 +95,9 @@ const ProductDetailPage = () => {
           </div>
           <Rating value={product.ratings} numReviews={product.numReviews} size="lg" />
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold">${price.toFixed(2)}</span>
+            <span className="text-3xl font-bold">{formatPrice(price)}</span>
             {product.discountPrice && product.discountPrice < product.price && (
-              <span className="text-gray-400 line-through text-xl">${product.price.toFixed(2)}</span>
+              <span className="text-gray-400 line-through text-xl">{formatPrice(product.price)}</span>
             )}
           </div>
 
