@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getOrderById } from '../../api/orderApi';
+import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
 
@@ -29,7 +30,7 @@ const OrderDetailPage = () => {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Order #{order._id.slice(-8).toUpperCase()}</h1>
+          <h1 className="text-2xl font-bold text-sage-900">Order #{order._id.slice(-8).toUpperCase()}</h1>
           <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
         </div>
         <span className={`font-bold capitalize ${STATUS_COLORS[order.status]}`}>{order.status}</span>
@@ -41,10 +42,10 @@ const OrderDetailPage = () => {
           <div className="flex items-center">
             {STEPS.map((step, i) => (
               <div key={step} className="flex items-center flex-1">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${i <= stepIndex ? 'bg-black border-black text-white' : 'border-gray-300 text-gray-400'}`}>{i + 1}</div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${i <= stepIndex ? 'bg-sage-600 border-sage-600 text-white' : 'border-gray-300 text-gray-400'}`}>{i + 1}</div>
                 <div className="flex-1 mx-1">
-                  <p className={`text-xs capitalize text-center ${i <= stepIndex ? 'text-black font-semibold' : 'text-gray-400'}`}>{step}</p>
-                  {i < STEPS.length - 1 && <div className={`h-0.5 mt-1 ${i < stepIndex ? 'bg-black' : 'bg-gray-200'}`} />}
+                  <p className={`text-xs capitalize text-center ${i <= stepIndex ? 'text-sage-700 font-semibold' : 'text-gray-400'}`}>{step}</p>
+                  {i < STEPS.length - 1 && <div className={`h-0.5 mt-1 ${i < stepIndex ? 'bg-sage-600' : 'bg-gray-200'}`} />}
                 </div>
               </div>
             ))}
@@ -63,7 +64,7 @@ const OrderDetailPage = () => {
                 <div className="flex-1 text-sm">
                   <p className="font-medium">{item.name}</p>
                   <p className="text-gray-500">Size: {item.size} {item.color && `| ${item.color}`} × {item.qty}</p>
-                  <p className="font-semibold">${(item.price * item.qty).toFixed(2)}</p>
+                  <p className="font-semibold text-sage-800">{formatPrice(item.price * item.qty)}</p>
                 </div>
               </div>
             ))}
@@ -79,15 +80,22 @@ const OrderDetailPage = () => {
               <p>{order.shippingAddress.address}</p>
               <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}</p>
               <p>{order.shippingAddress.country}</p>
+              {order.shippingAddress.phone && <p>📞 {order.shippingAddress.phone}</p>}
             </div>
           </div>
+
           <div className="bg-white border border-gray-200 rounded-xl p-5">
             <h2 className="font-bold mb-3">Payment Summary</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>${order.itemsPrice.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span>{order.shippingPrice === 0 ? 'FREE' : `$${order.shippingPrice.toFixed(2)}`}</span></div>
-              <div className="flex justify-between font-bold text-base border-t pt-2"><span>Total</span><span>${order.totalPrice.toFixed(2)}</span></div>
-              <p className={`text-xs font-semibold ${order.isPaid ? 'text-green-600' : 'text-red-500'}`}>{order.isPaid ? `✓ Paid on ${new Date(order.paidAt).toLocaleDateString()}` : 'Not Paid'}</p>
+              <div className="flex justify-between"><span className="text-gray-600">Payment</span>
+                <span className="font-medium">{order.paymentMethod === 'cod' ? '💵 Cash on Delivery' : '💳 Card'}</span>
+              </div>
+              <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>{formatPrice(order.itemsPrice)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span>{order.shippingPrice === 0 ? <span className="text-sage-600 font-medium">FREE</span> : formatPrice(order.shippingPrice)}</span></div>
+              <div className="flex justify-between font-bold text-base border-t pt-2"><span>Total</span><span className="text-sage-800">{formatPrice(order.totalPrice)}</span></div>
+              <p className={`text-xs font-semibold ${order.isPaid ? 'text-green-600' : order.paymentMethod === 'cod' ? 'text-orange-500' : 'text-red-500'}`}>
+                {order.isPaid ? `✓ Paid on ${new Date(order.paidAt).toLocaleDateString()}` : order.paymentMethod === 'cod' ? '⏳ Pay on delivery' : 'Not Paid'}
+              </p>
             </div>
           </div>
         </div>

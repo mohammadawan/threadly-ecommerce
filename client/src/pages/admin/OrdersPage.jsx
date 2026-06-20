@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllOrders, updateOrderStatus } from '../../api/orderApi';
+import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/Loader';
 import toast from 'react-hot-toast';
 
@@ -53,7 +54,7 @@ const OrdersPage = () => {
                 <th className="text-left p-4 font-semibold text-gray-600">Customer</th>
                 <th className="text-left p-4 font-semibold text-gray-600">Date</th>
                 <th className="text-left p-4 font-semibold text-gray-600">Total</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Paid</th>
+                <th className="text-left p-4 font-semibold text-gray-600">Payment</th>
                 <th className="text-left p-4 font-semibold text-gray-600">Status</th>
               </tr>
             </thead>
@@ -61,7 +62,7 @@ const OrdersPage = () => {
               {orders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="p-4">
-                    <Link to={`/admin/orders/${order._id}`} className="font-mono text-xs text-blue-600 hover:underline">
+                    <Link to={`/admin/orders/${order._id}`} className="font-mono text-xs text-sage-600 hover:underline">
                       #{order._id.slice(-8).toUpperCase()}
                     </Link>
                   </td>
@@ -70,11 +71,14 @@ const OrdersPage = () => {
                     <p className="text-xs text-gray-400">{order.user?.email}</p>
                   </td>
                   <td className="p-4 text-gray-600">{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td className="p-4 font-semibold">${order.totalPrice.toFixed(2)}</td>
+                  <td className="p-4 font-semibold text-sage-800">{formatPrice(order.totalPrice)}</td>
                   <td className="p-4">
-                    <span className={`text-xs font-semibold ${order.isPaid ? 'text-green-600' : 'text-red-500'}`}>
-                      {order.isPaid ? '✓ Paid' : 'Unpaid'}
-                    </span>
+                    <div>
+                      <span className="text-xs">{order.paymentMethod === 'cod' ? '💵 COD' : '💳 Card'}</span>
+                      <p className={`text-xs font-semibold ${order.isPaid ? 'text-green-600' : 'text-orange-500'}`}>
+                        {order.isPaid ? '✓ Paid' : order.paymentMethod === 'cod' ? 'On Delivery' : 'Unpaid'}
+                      </p>
+                    </div>
                   </td>
                   <td className="p-4">
                     <select
@@ -90,10 +94,12 @@ const OrdersPage = () => {
             </tbody>
           </table>
 
+          {orders.length === 0 && <p className="text-center text-gray-400 py-10">No orders yet</p>}
+
           {pages > 1 && (
             <div className="flex justify-center gap-2 p-4 border-t border-gray-100">
               {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-                <button key={p} onClick={() => setPage(p)} className={`px-3 py-1 rounded border text-sm ${p === page ? 'bg-black text-white border-black' : 'border-gray-300'}`}>{p}</button>
+                <button key={p} onClick={() => setPage(p)} className={`px-3 py-1 rounded border text-sm ${p === page ? 'bg-sage-600 text-white border-sage-600' : 'border-gray-300'}`}>{p}</button>
               ))}
             </div>
           )}

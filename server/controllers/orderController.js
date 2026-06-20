@@ -42,22 +42,30 @@ const createOrder = async (req, res, next) => {
     const shippingPrice = itemsPrice > 10000 ? 0 : 499;
     const totalPrice = Number((itemsPrice + shippingPrice).toFixed(2));
 
-    const stripe = getStripe();
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(totalPrice * 100),
-      currency: 'pkr',
-      metadata: { userId: req.user._id.toString() },
-    });
+    const method = paymentMethod || 'cod';
+    let stripePaymentIntentId;
+    let clientSecret;
+
+    if (method === 'stripe') {
+      const stripe = getStripe();
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(totalPrice * 100),
+        currency: 'pkr',
+        metadata: { userId: req.user._id.toString() },
+      });
+      stripePaymentIntentId = paymentIntent.id;
+      clientSecret = paymentIntent.client_secret;
+    }
 
     const order = await Order.create({
       user: req.user._id,
       orderItems: itemsWithPrices,
       shippingAddress,
-      paymentMethod: paymentMethod || 'stripe',
+      paymentMethod: method,
       itemsPrice,
       shippingPrice,
       totalPrice,
-      stripePaymentIntentId: paymentIntent.id,
+      ...(stripePaymentIntentId && { stripePaymentIntentId }),
     });
 
     // Decrement stock atomically
@@ -70,7 +78,7 @@ const createOrder = async (req, res, next) => {
       )
     );
 
-    res.status(201).json({ order, clientSecret: paymentIntent.client_secret });
+    res.status(201).json({ order, ...(clientSecret && { clientSecret }) });
   } catch (err) {
     next(err);
   }
