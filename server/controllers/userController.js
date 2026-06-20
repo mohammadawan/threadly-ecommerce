@@ -46,4 +46,24 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, getUserById, deleteUser };
+// @desc  Update user role (admin)
+// @route PUT /api/users/:id/role
+const updateUserRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    if (!['customer', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getUsers, getUserById, deleteUser, updateUserRole };

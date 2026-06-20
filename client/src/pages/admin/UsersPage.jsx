@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUsers, deleteUser } from '../../api/userApi';
+import { getUsers, deleteUser, updateUserRole } from '../../api/userApi';
 import Loader from '../../components/Loader';
 import toast from 'react-hot-toast';
 
@@ -30,6 +30,18 @@ const UsersPage = () => {
     }
   };
 
+  const handleRoleToggle = async (id, currentRole) => {
+    const newRole = currentRole === 'admin' ? 'customer' : 'admin';
+    if (!window.confirm(`Make this user a ${newRole}?`)) return;
+    try {
+      await updateUserRole(id, newRole);
+      toast.success(`User is now ${newRole}`);
+      load();
+    } catch {
+      toast.error('Failed to update role');
+    }
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Customers</h1>
@@ -40,6 +52,7 @@ const UsersPage = () => {
               <tr>
                 <th className="text-left p-4 font-semibold text-gray-600">Name</th>
                 <th className="text-left p-4 font-semibold text-gray-600">Email</th>
+                <th className="text-left p-4 font-semibold text-gray-600">Role</th>
                 <th className="text-left p-4 font-semibold text-gray-600">Joined</th>
                 <th className="p-4"></th>
               </tr>
@@ -49,14 +62,36 @@ const UsersPage = () => {
                 <tr key={u._id} className="hover:bg-gray-50">
                   <td className="p-4 font-medium">{u.name}</td>
                   <td className="p-4 text-gray-600">{u.email}</td>
+                  <td className="p-4">
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {u.role}
+                    </span>
+                  </td>
                   <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => handleDelete(u._id)} className="text-xs px-3 py-1 border border-red-200 text-red-600 rounded-lg hover:bg-red-50">Delete</button>
+                  <td className="p-4">
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => handleRoleToggle(u._id, u.role)}
+                        className={`text-xs px-3 py-1 border rounded-lg ${u.role === 'admin' ? 'border-gray-300 text-gray-600 hover:bg-gray-50' : 'border-purple-200 text-purple-600 hover:bg-purple-50'}`}
+                      >
+                        {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(u._id)}
+                        className="text-xs px-3 py-1 border border-red-200 text-red-600 rounded-lg hover:bg-red-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {users.length === 0 && (
+            <p className="text-center text-gray-400 py-8">No customers yet</p>
+          )}
 
           {pages > 1 && (
             <div className="flex justify-center gap-2 p-4 border-t border-gray-100">
