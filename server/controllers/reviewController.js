@@ -25,14 +25,14 @@ const createReview = async (req, res, next) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    // Verify purchase
+    // Allow review if order is paid (Stripe) OR delivered (COD)
     const hasPurchased = await Order.findOne({
       user: req.user._id,
-      isPaid: true,
       'orderItems.product': productId,
+      $or: [{ isPaid: true }, { status: 'delivered' }],
     });
     if (!hasPurchased) {
-      return res.status(403).json({ message: 'You can only review products you have purchased' });
+      return res.status(403).json({ message: 'You can only review products you have purchased and received' });
     }
 
     const exists = await Review.findOne({ user: req.user._id, product: productId });
