@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { getUsers, deleteUser, updateUserRole } from '../../api/userApi';
 import Loader from '../../components/Loader';
 import toast from 'react-hot-toast';
 
 const UsersPage = () => {
+  const { userInfo } = useSelector((s) => s.auth);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('customer');
@@ -58,34 +60,46 @@ const UsersPage = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {list.map((u) => (
-            <tr key={u._id} className="hover:bg-gray-50">
-              <td className="p-4 font-medium">{u.name}</td>
-              <td className="p-4 text-gray-600">{u.email}</td>
-              <td className="p-4">
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                  {u.role}
-                </span>
-              </td>
-              <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
-              <td className="p-4">
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => handleRoleToggle(u._id, u.role)}
-                    className={`text-xs px-3 py-1 border rounded-lg ${u.role === 'admin' ? 'border-gray-300 text-gray-600 hover:bg-gray-50' : 'border-purple-200 text-purple-600 hover:bg-purple-50'}`}
-                  >
-                    {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(u._id)}
-                    className="text-xs px-3 py-1 border border-red-200 text-red-600 rounded-lg hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {list.map((u) => {
+            const isSelf = u._id === userInfo?._id;
+            return (
+              <tr key={u._id} className={`hover:bg-gray-50 ${isSelf ? 'bg-sage-50' : ''}`}>
+                <td className="p-4 font-medium">
+                  {u.name}
+                  {isSelf && <span className="ml-2 text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-semibold">You</span>}
+                </td>
+                <td className="p-4 text-gray-600">{u.email}</td>
+                <td className="p-4">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    {u.role}
+                  </span>
+                </td>
+                <td className="p-4 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                <td className="p-4">
+                  {isSelf ? (
+                    <span className="text-xs text-gray-400 italic px-3">Protected</span>
+                  ) : (
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => handleRoleToggle(u._id, u.role)}
+                        className={`text-xs px-3 py-1 border rounded-lg ${u.role === 'admin' ? 'border-gray-300 text-gray-600 hover:bg-gray-50' : 'border-purple-200 text-purple-600 hover:bg-purple-50'}`}
+                      >
+                        {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                      </button>
+                      {u.role !== 'admin' && (
+                        <button
+                          onClick={() => handleDelete(u._id)}
+                          className="text-xs px-3 py-1 border border-red-200 text-red-600 rounded-lg hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       {list.length === 0 && (
