@@ -13,12 +13,13 @@ const ProductFormPage = () => {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
-  const [images, setImages] = useState([]);
+  const [imageInput, setImageInput] = useState('');
   const [form, setForm] = useState({
     name: '', description: '', price: '', discountPrice: '', category: 'men',
     subCategory: '', brand: '', isFeatured: false,
     sizes: [{ size: 'S', stock: 0 }, { size: 'M', stock: 0 }, { size: 'L', stock: 0 }, { size: 'XL', stock: 0 }],
     colors: '',
+    images: [],
   });
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const ProductFormPage = () => {
     getProductById(id)
       .then((res) => {
         const p = res.data;
-        setForm({ ...p, colors: p.colors?.join(', ') || '', discountPrice: p.discountPrice || '', sizes: p.sizes || [] });
+        setForm({ ...p, colors: p.colors?.join(', ') || '', discountPrice: p.discountPrice || '', sizes: p.sizes || [], images: p.images || [] });
       })
       .catch(() => toast.error('Failed to load product'))
       .finally(() => setLoading(false));
@@ -46,20 +47,31 @@ const ProductFormPage = () => {
   const addSize = () => setForm((prev) => ({ ...prev, sizes: [...prev.sizes, { size: '', stock: 0 }] }));
   const removeSize = (i) => setForm((prev) => ({ ...prev, sizes: prev.sizes.filter((_, idx) => idx !== i) }));
 
+  const addImage = () => {
+    const url = imageInput.trim();
+    if (!url) return;
+    if (!url.startsWith('http')) return toast.error('Please enter a valid image URL');
+    if (form.images.includes(url)) return toast.error('Image already added');
+    setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+    setImageInput('');
+  };
+
+  const removeImage = (i) => setForm((prev) => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const formData = new FormData();
-      Object.entries(form).forEach(([k, v]) => {
-        if (k === 'sizes') formData.append(k, JSON.stringify(v));
-        else if (k === 'colors') formData.append(k, JSON.stringify(v.split(',').map((c) => c.trim()).filter(Boolean)));
-        else formData.append(k, v);
-      });
-      images.forEach((img) => formData.append('images', img));
+      const payload = {
+        ...form,
+        colors: form.colors.split(',').map((c) => c.trim()).filter(Boolean),
+        sizes: form.sizes,
+        images: form.images,
+      };
+      if (!payload.discountPrice) delete payload.discountPrice;
 
-      if (isEdit) await updateProduct(id, formData);
-      else await createProduct(formData);
+      if (isEdit) await updateProduct(id, payload);
+      else await createProduct(payload);
 
       toast.success(isEdit ? 'Product updated' : 'Product created');
       navigate('/admin/products');
@@ -79,15 +91,15 @@ const ProductFormPage = () => {
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <label className="text-sm font-medium block mb-1">Product Name *</label>
-            <input name="name" value={form.name} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black" />
+            <input name="name" value={form.name} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sage-400" />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Price *</label>
-            <input name="price" type="number" step="0.01" value={form.price} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none" />
+            <label className="text-sm font-medium block mb-1">Price (Rs.) *</label>
+            <input name="price" type="number" value={form.price} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none" />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Discount Price</label>
-            <input name="discountPrice" type="number" step="0.01" value={form.discountPrice} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none" />
+            <label className="text-sm font-medium block mb-1">Discount Price (Rs.)</label>
+            <input name="discountPrice" type="number" value={form.discountPrice} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none" />
           </div>
           <div>
             <label className="text-sm font-medium block mb-1">Category *</label>
@@ -104,7 +116,7 @@ const ProductFormPage = () => {
             <input name="brand" value={form.brand} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none" />
           </div>
           <div className="flex items-center gap-2 self-end pb-2">
-            <input type="checkbox" name="isFeatured" id="featured" checked={form.isFeatured} onChange={handleChange} className="w-4 h-4" />
+            <input type="checkbox" name="isFeatured" id="featured" checked={form.isFeatured} onChange={handleChange} className="w-4 h-4 accent-sage-600" />
             <label htmlFor="featured" className="text-sm font-medium">Featured Product</label>
           </div>
           <div className="col-span-2">
@@ -121,7 +133,7 @@ const ProductFormPage = () => {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Sizes & Stock</label>
-            <button type="button" onClick={addSize} className="text-xs text-blue-600 hover:underline">+ Add Size</button>
+            <button type="button" onClick={addSize} className="text-xs text-sage-600 hover:underline">+ Add Size</button>
           </div>
           <div className="space-y-2">
             {form.sizes.map((s, i) => (
@@ -134,15 +146,43 @@ const ProductFormPage = () => {
           </div>
         </div>
 
-        {/* Images */}
+        {/* Image URLs */}
         <div>
-          <label className="text-sm font-medium block mb-1">Images {!isEdit && '(up to 5)'}</label>
-          <input type="file" accept="image/*" multiple onChange={(e) => setImages(Array.from(e.target.files))} className="text-sm" />
-          {images.length > 0 && <p className="text-xs text-gray-400 mt-1">{images.length} file(s) selected</p>}
+          <label className="text-sm font-medium block mb-1">Product Images (paste URLs)</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              value={imageInput}
+              onChange={(e) => setImageInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+              placeholder="https://example.com/image.jpg"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sage-400"
+            />
+            <button type="button" onClick={addImage} className="bg-sage-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-sage-700">
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mb-3">Tip: right-click any image on Google → "Copy image address" then paste here</p>
+
+          {form.images.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {form.images.map((url, i) => (
+                <div key={i} className="relative group">
+                  <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-gray-200 bg-gray-100" onError={(e) => { e.target.src = 'https://placehold.co/80x80?text=Error'; }} />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={saving} className="bg-black text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50">
+          <button type="submit" disabled={saving} className="bg-sage-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-sage-700 disabled:opacity-50 transition-colors">
             {saving ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}
           </button>
           <button type="button" onClick={() => navigate('/admin/products')} className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">

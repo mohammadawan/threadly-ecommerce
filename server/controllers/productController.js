@@ -1,6 +1,5 @@
 const { validationResult } = require('express-validator');
 const Product = require('../models/Product');
-const { uploadToCloudinary } = require('../config/cloudinary');
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -69,10 +68,7 @@ const createProduct = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const images = req.files?.length
-      ? await Promise.all(req.files.map((f) => uploadToCloudinary(f.buffer).then((r) => r.secure_url)))
-      : [];
-    const product = await Product.create({ ...req.body, images });
+    const product = await Product.create(req.body);
     res.status(201).json(product);
   } catch (err) {
     next(err);
@@ -86,15 +82,7 @@ const updateProduct = async (req, res, next) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    const newImages = req.files?.length
-      ? await Promise.all(req.files.map((f) => uploadToCloudinary(f.buffer).then((r) => r.secure_url)))
-      : [];
-    const updatedData = { ...req.body };
-    if (newImages.length > 0) updatedData.images = newImages;
-    if (typeof updatedData.sizes === 'string') updatedData.sizes = JSON.parse(updatedData.sizes);
-    if (typeof updatedData.colors === 'string') updatedData.colors = JSON.parse(updatedData.colors);
-
-    const updated = await Product.findByIdAndUpdate(req.params.id, updatedData, {
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true, runValidators: true,
     });
     res.json(updated);
