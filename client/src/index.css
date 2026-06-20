@@ -2,12 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
+
 * {
   box-sizing: border-box;
 }
 
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: #f8f7f4;
+  color: #1e1e1e;
 }

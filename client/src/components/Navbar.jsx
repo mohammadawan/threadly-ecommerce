@@ -15,7 +15,6 @@ const Navbar = () => {
 
   const cartCount = cartItems.reduce((a, i) => a + i.qty, 0);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -38,19 +37,23 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white border-b border-sage-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold tracking-tight">Threadly</Link>
 
-          {/* Nav links - desktop */}
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.jpg" alt="Threadly" className="h-10 w-10 rounded-full object-cover" />
+            <span className="text-xl font-bold text-sage-800 tracking-tight">Threadly</span>
+          </Link>
+
+          {/* Nav links */}
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <Link to="/products" className="hover:text-black">All</Link>
-            <Link to="/products?category=men" className="hover:text-black">Men</Link>
-            <Link to="/products?category=women" className="hover:text-black">Women</Link>
-            <Link to="/products?category=kids" className="hover:text-black">Kids</Link>
-            <Link to="/products?category=accessories" className="hover:text-black">Accessories</Link>
+            <Link to="/products" className="hover:text-sage-600 transition-colors">All</Link>
+            <Link to="/products?category=men" className="hover:text-sage-600 transition-colors">Men</Link>
+            <Link to="/products?category=women" className="hover:text-sage-600 transition-colors">Women</Link>
+            <Link to="/products?category=kids" className="hover:text-sage-600 transition-colors">Kids</Link>
+            <Link to="/products?category=accessories" className="hover:text-sage-600 transition-colors">Accessories</Link>
           </div>
 
           {/* Search */}
@@ -59,9 +62,9 @@ const Navbar = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search..."
-              className="border border-gray-300 rounded-l-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-black w-40"
+              className="border border-sage-200 rounded-l-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-sage-400 w-40 bg-sage-50"
             />
-            <button type="submit" className="bg-black text-white px-3 py-1.5 rounded-r-lg text-sm hover:bg-gray-800">
+            <button type="submit" className="bg-sage-600 text-white px-3 py-1.5 rounded-r-lg text-sm hover:bg-sage-700 transition-colors">
               ⌕
             </button>
           </form>
@@ -71,7 +74,7 @@ const Navbar = () => {
             <Link to="/cart" className="relative">
               <span className="text-xl">🛒</span>
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-sage-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
@@ -81,18 +84,18 @@ const Navbar = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-1 text-sm font-medium hover:text-gray-600"
+                  className="flex items-center gap-1 text-sm font-medium text-sage-800 hover:text-sage-600 transition-colors"
                 >
                   {userInfo.name.split(' ')[0]} ▾
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-sage-100 rounded-xl shadow-lg z-50">
                     {userInfo.role === 'admin' && (
                       <Link
                         to="/admin"
                         onClick={() => setDropdownOpen(false)}
-                        className="block px-4 py-2.5 text-sm hover:bg-gray-50"
+                        className="block px-4 py-2.5 text-sm hover:bg-sage-50 text-sage-700 font-medium"
                       >
                         Admin Dashboard
                       </Link>
@@ -100,14 +103,14 @@ const Navbar = () => {
                     <Link
                       to="/orders"
                       onClick={() => setDropdownOpen(false)}
-                      className="block px-4 py-2.5 text-sm hover:bg-gray-50"
+                      className="block px-4 py-2.5 text-sm hover:bg-sage-50"
                     >
                       My Orders
                     </Link>
-                    <hr className="border-gray-100" />
+                    <hr className="border-sage-100" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-b-xl"
                     >
                       Logout
                     </button>
@@ -115,26 +118,25 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <Link to="/login" className="text-sm font-medium bg-black text-white px-4 py-1.5 rounded-lg hover:bg-gray-800">
+              <Link to="/login" className="text-sm font-medium bg-sage-600 text-white px-4 py-1.5 rounded-lg hover:bg-sage-700 transition-colors">
                 Login
               </Link>
             )}
 
-            {/* Mobile hamburger */}
-            <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+            <button className="md:hidden text-sage-700" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden py-3 border-t border-gray-100 flex flex-col gap-3 text-sm">
-            <Link to="/products" onClick={() => setMenuOpen(false)}>All</Link>
-            <Link to="/products?category=men" onClick={() => setMenuOpen(false)}>Men</Link>
-            <Link to="/products?category=women" onClick={() => setMenuOpen(false)}>Women</Link>
-            <Link to="/products?category=kids" onClick={() => setMenuOpen(false)}>Kids</Link>
+          <div className="md:hidden py-3 border-t border-sage-100 flex flex-col gap-3 text-sm">
+            <Link to="/products" onClick={() => setMenuOpen(false)} className="hover:text-sage-600">All</Link>
+            <Link to="/products?category=men" onClick={() => setMenuOpen(false)} className="hover:text-sage-600">Men</Link>
+            <Link to="/products?category=women" onClick={() => setMenuOpen(false)} className="hover:text-sage-600">Women</Link>
+            <Link to="/products?category=kids" onClick={() => setMenuOpen(false)} className="hover:text-sage-600">Kids</Link>
             <form onSubmit={handleSearch} className="flex">
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="border rounded-l px-2 py-1 flex-1 text-sm focus:outline-none" />
-              <button type="submit" className="bg-black text-white px-3 rounded-r text-sm">⌕</button>
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="border border-sage-200 rounded-l px-2 py-1 flex-1 text-sm focus:outline-none bg-sage-50" />
+              <button type="submit" className="bg-sage-600 text-white px-3 rounded-r text-sm">⌕</button>
             </form>
           </div>
         )}
