@@ -66,6 +66,7 @@ const createOrder = async (req, res, next) => {
       shippingPrice,
       totalPrice,
       ...(stripePaymentIntentId && { stripePaymentIntentId }),
+      statusHistory: [{ status: 'pending', message: 'Order placed successfully' }],
     });
 
     // Decrement stock atomically
@@ -163,9 +164,19 @@ const getAllOrders = async (req, res, next) => {
 const updateOrderStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
+    const messages = {
+      processing: 'Order confirmed and being prepared',
+      shipped: 'Order has been shipped and is on the way',
+      delivered: 'Order delivered successfully',
+      cancelled: 'Order has been cancelled',
+    };
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { status },
+      {
+        status,
+        $push: { statusHistory: { status, message: messages[status] || `Status updated to ${status}` } },
+        ...(status === 'delivered' ? { isPaid: true, paidAt: new Date() } : {}),
+      },
       { new: true, runValidators: true }
     );
     if (!order) return res.status(404).json({ message: 'Order not found' });
