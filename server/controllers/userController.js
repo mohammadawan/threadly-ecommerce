@@ -5,11 +5,11 @@ const Order = require('../models/Order');
 // @route GET /api/users
 const getUsers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
+    const { page = 1, limit = 100 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
     const [users, total] = await Promise.all([
-      User.find({ role: 'customer' }).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      User.countDocuments({ role: 'customer' }),
+      User.find({}).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      User.countDocuments({}),
     ]);
     res.json({ users, page: Number(page), pages: Math.ceil(total / limit), total });
   } catch (err) {
