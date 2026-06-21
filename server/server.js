@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -34,6 +35,33 @@ app.use(
   })
 );
 
+// Rate limiters
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: { message: 'Too many attempts, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const orderLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 30,
+  message: { message: 'Too many orders placed, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  message: { message: 'Too many requests, please slow down' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', globalLimiter);
+
 // Stripe webhook MUST receive raw body — mount before express.json()
 app.use('/api/webhooks', webhookRoutes);
 
@@ -41,9 +69,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/orders', orderLimiter, orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 
