@@ -40,7 +40,7 @@ const OrderHistoryPage = () => {
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <Link key={order._id} to={`/orders/${order._id}`} className="block bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-sage-200 transition">
+            <div key={order._id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-sage-200 transition">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Order #{order._id.slice(-8).toUpperCase()}</p>
@@ -62,7 +62,22 @@ const OrderHistoryPage = () => {
                   <img key={i} src={item.image || 'https://placehold.co/60x60'} alt={item.name} className="w-14 h-14 rounded-lg object-cover bg-gray-100 shrink-0" />
                 ))}
               </div>
-            </Link>
+              <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100">
+                <Link
+                  to={`/track/${order._id}`}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-sage-700 bg-sage-50 border border-sage-200 px-4 py-2 rounded-lg hover:bg-sage-100 transition"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                  Track Order
+                </Link>
+                <Link
+                  to={`/orders/${order._id}`}
+                  className="flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       )}

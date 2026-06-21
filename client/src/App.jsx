@@ -15,6 +15,7 @@ import CartPage from './pages/shop/CartPage';
 import CheckoutPage from './pages/shop/CheckoutPage';
 import OrderHistoryPage from './pages/shop/OrderHistoryPage';
 import OrderDetailPage from './pages/shop/OrderDetailPage';
+import TrackOrderPage from './pages/shop/TrackOrderPage';
 import LoginPage from './pages/shop/LoginPage';
 import RegisterPage from './pages/shop/RegisterPage';
 
@@ -60,6 +61,7 @@ const AppInner = () => {
         <Route path="/checkout" element={<ShopLayout><CheckoutPage /></ShopLayout>} />
         <Route path="/orders" element={<ShopLayout><OrderHistoryPage /></ShopLayout>} />
         <Route path="/orders/:id" element={<ShopLayout><OrderDetailPage /></ShopLayout>} />
+        <Route path="/track/:id" element={<ShopLayout><TrackOrderPage /></ShopLayout>} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
