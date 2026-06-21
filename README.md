@@ -1,11 +1,41 @@
 # Threadly — MERN Clothing E-Commerce
 
-A full-stack clothing e-commerce platform built with the MERN stack. Features a customer storefront and a full admin dashboard.
+A full-stack clothing e-commerce platform built with the MERN stack. Features a complete customer storefront and a fully responsive admin dashboard.
+
+> **Portfolio project** — built to demonstrate full-stack development with real-world features like Cash on Delivery, order tracking, analytics, and role-based access control.
+
+---
 
 ## Live Demo
 
-- **Frontend:** (Vercel URL here)
-- **Backend:** (Railway URL here)
+| | URL |
+|---|---|
+| **Frontend** | https://threadly-ecommerce.vercel.app |
+| **Backend API** | https://threadly-server.railway.app |
+
+### Demo Accounts
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@threadly.com | admin123 |
+| Customer | user@threadly.com | user123 |
+
+---
+
+## Screenshots
+
+### Storefront
+- Hero landing page with sage green theme
+- Product listing with filters, search, and sorting
+- Product detail with size selector, reviews, and star ratings
+- Cart, checkout with Cash on Delivery option
+- Order history with visual tracking timeline
+
+### Admin Panel
+- Dashboard with revenue chart, metric cards, and best sellers
+- Product management (URL-based images, no Cloudinary needed)
+- Order management with inline status updates
+- Users split into Customers / Admins tabs
 
 ---
 
@@ -13,12 +43,11 @@ A full-stack clothing e-commerce platform built with the MERN stack. Features a 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, Tailwind CSS, Redux Toolkit |
+| Frontend | React 18, Vite, Tailwind CSS v3, Redux Toolkit |
 | Backend | Node.js, Express.js |
 | Database | MongoDB Atlas + Mongoose |
 | Auth | JWT + bcryptjs |
-| Payments | Stripe |
-| Image Upload | Cloudinary |
+| Payments | Cash on Delivery (default) + Stripe (card) |
 | Charts | Recharts |
 | Deployment | Vercel (client) + Railway (server) |
 
@@ -27,24 +56,36 @@ A full-stack clothing e-commerce platform built with the MERN stack. Features a 
 ## Features
 
 ### Customer Storefront
-- Home page with hero banner, featured products, and category navigation
-- Product listing with filters (category, size, color, price range), sorting, and pagination
-- Product detail page with image gallery, size/color selector, and stock awareness
-- Reviews & ratings (only verified purchasers can review)
-- Shopping cart persisted in Redux + localStorage
-- Secure checkout with Stripe payment
-- Order history with real-time status tracker
-- Wishlist (add/remove saved products)
-- Search with keyword filtering
+- Sage green themed UI with Dancing Script logo
+- Product listing — filter by category, size, color, price range; sort by price / newest / rating
+- Product detail — image gallery, size picker, stock badge, discount % badge
+- Star ratings and reviews (only after order is delivered)
+- Shopping cart with persistent Redux + localStorage state
+- Checkout — Cash on Delivery (default) or Card payment
+- Free shipping on orders above Rs. 10,000
+- Order history with payment method badges
+- **Order tracking page** — visual 4-step journey (Placed → Packed → In Transit → Delivered) with real timestamps
+- Search by keyword
+- Password show/hide toggle on login and register
 
-### Admin Dashboard (`/admin`)
-- Revenue chart (last 7 / 30 / 90 days) with Recharts
+### Admin Dashboard (`/admin`) — Fully Responsive
+- Slide-out sidebar on mobile with hamburger toggle
+- Revenue area chart (last 7 / 30 / 90 days)
 - Metric cards: total revenue, orders, products, customers
-- Product management: create, edit, delete, image upload, stock per size, featured toggle
-- Order management: filter by status, update order status
-- Customer management: list and delete users
+- Pending COD banner with total outstanding amount
 - Best-selling products widget
-- Low-stock alerts
+- Product management — add/edit/delete, URL-based images, per-size stock, featured toggle
+- Order management — filter by status, inline status dropdown, payment info
+- User management — separate Customers and Admins tabs, Make Admin / Remove Admin, self-protection (can't delete or demote yourself)
+- Demo credentials shown on login page for easy testing
+
+### Security & Business Logic
+- JWT authentication with role stored in database (not just localStorage)
+- Auto-refresh role from server on every app load — prevents stale admin role issues
+- Admin self-protection: cannot delete own account or change own role
+- COD orders auto-mark as paid when admin sets status to "delivered"
+- Reviews require order to be delivered (not just paid)
+- Order status history with timestamps for full tracking timeline
 
 ---
 
@@ -55,37 +96,36 @@ threadly/
 ├── client/                  # React frontend (Vite)
 │   └── src/
 │       ├── api/             # Axios instance + API functions
-│       ├── components/      # Navbar, Footer, ProductCard, etc.
+│       ├── components/      # Navbar, Footer, ProductCard, Loader, Message
 │       ├── pages/
-│       │   ├── shop/        # Home, ProductList, Cart, Checkout, Orders
-│       │   └── admin/       # Dashboard, Products, Orders, Users
+│       │   ├── shop/        # Home, Products, Cart, Checkout, Orders, Track, Login, Register
+│       │   └── admin/       # Dashboard, Products, Orders, Users, ProductForm
 │       ├── redux/           # authSlice, cartSlice, store
-│       └── routes/          # ProtectedRoute, AdminRoute
+│       ├── routes/          # ProtectedRoute, AdminRoute
+│       └── utils/           # formatPrice (PKR formatter)
 └── server/                  # Express backend
-    ├── config/              # db.js, cloudinary.js
-    ├── controllers/         # auth, product, order, user, review, wishlist
-    ├── middleware/          # auth, admin, errorHandler, upload
+    ├── config/              # db.js
+    ├── controllers/         # auth, product, order, user, review
+    ├── middleware/          # auth, admin, errorHandler
     ├── models/              # User, Product, Order, Review
     ├── routes/              # All API routes
-    ├── scripts/             # seed.js
+    ├── scripts/             # seed.js (8 products + demo users)
     └── server.js
 ```
 
 ---
 
-## Getting Started
+## Getting Started (Local)
 
 ### Prerequisites
 - Node.js v18+
-- MongoDB Atlas account
-- Stripe account (test mode)
-- Cloudinary account
+- MongoDB Atlas account (free tier works)
 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/threadly.git
-cd threadly
+git clone https://github.com/mohammadawan/threadly-ecommerce.git
+cd threadly-ecommerce
 ```
 
 ### 2. Setup the Backend
@@ -95,28 +135,19 @@ cd server
 npm install
 ```
 
-Create a `.env` file in `server/`:
+Create `server/.env`:
 
 ```env
 NODE_ENV=development
 PORT=5000
-
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/threadly
-
-JWT_SECRET=your_jwt_secret_here
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/threadly
+JWT_SECRET=your_secret_here
 JWT_EXPIRE=30d
-
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-STRIPE_SECRET_KEY=sk_test_your_key
-STRIPE_WEBHOOK_SECRET=whsec_your_secret
-
 CLIENT_URL=http://localhost:5173
+STRIPE_SECRET_KEY=sk_test_your_key
 ```
 
-Seed sample data (optional):
+Seed the database with sample products and users:
 
 ```bash
 npm run seed
@@ -137,11 +168,10 @@ cd client
 npm install
 ```
 
-Create a `.env` file in `client/`:
+Create `client/.env`:
 
 ```env
 VITE_API_URL=/api
-VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
 ```
 
 Start the client:
@@ -173,7 +203,6 @@ Client runs on `http://localhost:5173`
 | POST | `/api/products` | Admin |
 | PUT | `/api/products/:id` | Admin |
 | DELETE | `/api/products/:id` | Admin |
-| GET | `/api/products/low-stock` | Admin |
 
 ### Orders
 | Method | Endpoint | Access |
@@ -181,7 +210,6 @@ Client runs on `http://localhost:5173`
 | POST | `/api/orders` | Protected |
 | GET | `/api/orders/myorders` | Protected |
 | GET | `/api/orders/:id` | Protected |
-| PUT | `/api/orders/:id/pay` | Protected |
 | GET | `/api/orders` | Admin |
 | PUT | `/api/orders/:id/status` | Admin |
 | GET | `/api/orders/analytics` | Admin |
@@ -190,15 +218,14 @@ Client runs on `http://localhost:5173`
 | Method | Endpoint | Access |
 |---|---|---|
 | GET | `/api/products/:id/reviews` | Public |
-| POST | `/api/products/:id/reviews` | Protected (verified buyers only) |
-| DELETE | `/api/products/:id/reviews/:reviewId` | Protected |
+| POST | `/api/products/:id/reviews` | Protected (delivered orders only) |
 
-### Wishlist
+### Users
 | Method | Endpoint | Access |
 |---|---|---|
-| GET | `/api/wishlist` | Protected |
-| POST | `/api/wishlist/:productId` | Protected |
-| DELETE | `/api/wishlist/:productId` | Protected |
+| GET | `/api/users` | Admin |
+| DELETE | `/api/users/:id` | Admin |
+| PUT | `/api/users/:id/role` | Admin |
 
 ---
 
@@ -206,59 +233,41 @@ Client runs on `http://localhost:5173`
 
 ### Backend → Railway
 
-1. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-2. Select the `server` folder as the root directory
-3. Add all environment variables from `.env` (use production values)
+1. [railway.app](https://railway.app) → New Project → Deploy from GitHub
+2. Set root directory to `server`
+3. Add environment variables (production values)
 4. Set `NODE_ENV=production`
-5. Copy the generated Railway URL
+5. Copy the Railway URL
 
 ### Frontend → Vercel
 
-1. Go to [vercel.com](https://vercel.com) → New Project → Import from GitHub
+1. [vercel.com](https://vercel.com) → New Project → Import GitHub repo
 2. Set **Root Directory** to `client`
-3. Add environment variables:
-   - `VITE_API_URL` = `https://your-railway-url.railway.app/api`
-   - `VITE_STRIPE_PUBLIC_KEY` = your Stripe publishable key
+3. Add environment variable: `VITE_API_URL=https://your-railway-url.railway.app/api`
 4. Deploy
 
-### After Deployment
-- Update `CLIENT_URL` in Railway to your Vercel URL (for CORS)
-- Update `VITE_API_URL` in Vercel to your Railway URL
+After deploying both, update `CLIENT_URL` in Railway to your Vercel URL.
 
 ---
 
-## Default Admin Account (after seeding)
-
-```
-Email:    admin@threadly.com
-Password: admin123
-```
-
----
-
-## Environment Variables Reference
+## Environment Variables
 
 ### Server
-| Variable | Description |
-|---|---|
-| `MONGO_URI` | MongoDB Atlas connection string |
-| `JWT_SECRET` | Secret key for JWT signing |
-| `JWT_EXPIRE` | JWT expiry (e.g. `30d`) |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
-| `STRIPE_SECRET_KEY` | Stripe secret key (`sk_test_...`) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret (`whsec_...`) |
-| `CLIENT_URL` | Frontend URL for CORS |
+| Variable | Required | Description |
+|---|---|---|
+| `MONGO_URI` | Yes | MongoDB Atlas connection string |
+| `JWT_SECRET` | Yes | Secret for JWT signing |
+| `JWT_EXPIRE` | Yes | JWT expiry (e.g. `30d`) |
+| `CLIENT_URL` | Yes | Frontend URL for CORS |
+| `STRIPE_SECRET_KEY` | Optional | Stripe secret key (only for card payments) |
 
 ### Client
-| Variable | Description |
-|---|---|
-| `VITE_API_URL` | Backend API base URL |
-| `VITE_STRIPE_PUBLIC_KEY` | Stripe publishable key (`pk_test_...`) |
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_API_URL` | Yes | Backend API base URL |
 
 ---
 
 ## License
 
-MIT
+MIT — free to use for portfolio and learning purposes.
