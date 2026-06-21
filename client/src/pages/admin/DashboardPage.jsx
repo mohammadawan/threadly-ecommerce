@@ -23,15 +23,15 @@ const METRIC_STYLES = {
 const MetricCard = ({ label, value, sub, color = 'sage', icon }) => {
   const s = METRIC_STYLES[color];
   return (
-    <div className={`rounded-xl border p-4 sm:p-5 ${s.wrap}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className={`text-xs sm:text-sm opacity-70 mb-1 ${s.text}`}>{label}</p>
-          <p className={`text-2xl sm:text-3xl font-bold truncate ${s.text}`}>{value}</p>
+    <div className={`rounded-xl border p-3 sm:p-5 ${s.wrap}`}>
+      <div className="flex items-start justify-between gap-1">
+        <div className="min-w-0 flex-1">
+          <p className={`text-xs opacity-70 mb-1 ${s.text}`}>{label}</p>
+          <p className={`text-base sm:text-2xl lg:text-3xl font-bold leading-tight break-words ${s.text}`}>{value}</p>
           {sub && <p className={`text-xs opacity-60 mt-1 ${s.text}`}>{sub}</p>}
         </div>
         {icon && (
-          <div className={`p-2 rounded-lg shrink-0 ${s.iconBg}`}>
+          <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 hidden sm:block ${s.iconBg}`}>
             <span className={s.icon}>{icon}</span>
           </div>
         )}
