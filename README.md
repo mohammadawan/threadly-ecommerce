@@ -11,7 +11,6 @@ A full-stack clothing e-commerce platform built with the MERN stack. Features a 
 | | URL |
 |---|---|
 | **Frontend** | https://threadly-ecommerce.vercel.app |
-| **Backend API** | https://threadly-server.railway.app |
 
 ### Demo Accounts
 
