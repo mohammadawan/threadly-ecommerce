@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
+import { fetchMe, logout } from './redux/authSlice';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -30,9 +33,21 @@ const ShopLayout = ({ children }) => (
   </div>
 );
 
-const App = () => (
-  <BrowserRouter>
-    <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+const AppInner = () => {
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((s) => s.auth);
+
+  // On every app load, refresh user data from server to get latest role
+  useEffect(() => {
+    if (userInfo?.token) {
+      dispatch(fetchMe()).unwrap().catch(() => {
+        // Token expired or invalid — log out
+        dispatch(logout());
+      });
+    }
+  }, []);
+
+  return (
     <Routes>
       <Route path="/" element={<ShopLayout><HomePage /></ShopLayout>} />
       <Route path="/products" element={<ShopLayout><ProductListPage /></ShopLayout>} />
@@ -60,6 +75,13 @@ const App = () => (
         </Route>
       </Route>
     </Routes>
+  );
+};
+
+const App = () => (
+  <BrowserRouter>
+    <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+    <AppInner />
   </BrowserRouter>
 );
 

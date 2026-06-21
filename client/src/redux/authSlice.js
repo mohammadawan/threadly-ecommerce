@@ -63,7 +63,10 @@ const authSlice = createSlice({
     builder
       .addCase(login.pending, pending).addCase(login.fulfilled, fulfilled).addCase(login.rejected, rejected)
       .addCase(register.pending, pending).addCase(register.fulfilled, fulfilled).addCase(register.rejected, rejected)
-      .addCase(fetchMe.fulfilled, (state, action) => { state.userInfo = { ...state.userInfo, ...action.payload }; })
+      .addCase(fetchMe.fulfilled, (state, action) => {
+        state.userInfo = { ...state.userInfo, ...action.payload };
+        localStorage.setItem('userInfo', JSON.stringify(state.userInfo));
+      })
       .addCase(updateProfile.pending, pending).addCase(updateProfile.fulfilled, fulfilled).addCase(updateProfile.rejected, rejected);
   },
 });
