@@ -67,15 +67,12 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`relative px-3 py-2 rounded-lg transition-all duration-200 group
-                  ${isActive(link.to)
-                    ? 'text-sage-700 bg-sage-50'
-                    : 'text-gray-600 hover:text-sage-700 hover:bg-sage-50'
-                  }`}
+                className={`relative px-3 py-2 transition-colors duration-200 group
+                  ${isActive(link.to) ? 'text-sage-700' : 'text-gray-600 hover:text-sage-700'}`}
               >
                 {link.label}
-                <span className={`absolute bottom-0.5 left-3 right-3 h-0.5 rounded-full bg-sage-500 transition-all duration-200
-                  ${isActive(link.to) ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'}`}
+                <span className={`absolute bottom-0 left-0 right-0 h-0.5 bg-sage-500 transition-all duration-250 origin-left
+                  ${isActive(link.to) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
                 />
               </Link>
             ))}
